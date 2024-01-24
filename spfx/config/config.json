@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "better-hero-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/betterHero/BetterHeroWebPart.js",
+          "manifest": "./src/webparts/betterHero/BetterHeroWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "BetterHeroWebPartStrings": "lib/webparts/betterHero/loc/{locale}.js"
+  }
+}

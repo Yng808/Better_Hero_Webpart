@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "better-hero-client-side-solution",
+    "id": "87b658de-3190-4eef-b701-dc7ba6411b8d",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "BetterHero description"
+      },
+      "longDescription": {
+        "default": "BetterHero description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "better-hero Feature",
+        "description": "The feature that activates elements of the better-hero solution.",
+        "id": "bfb4a547-3aef-45a3-a025-a276c95460e6",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "../../dist/sp-dashboard.sppkg"
+  }
+}
