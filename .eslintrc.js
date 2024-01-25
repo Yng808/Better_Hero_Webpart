@@ -85,7 +85,7 @@ module.exports = {
         //                    or else return the object to a caller (who assumes this responsibility).  Unterminated
         //                    promise chains are a serious issue.  Besides causing errors to be silently ignored,
         //                    they can also cause a NodeJS process to terminate unexpectedly.
-        '@typescript-eslint/no-floating-promises': 2,
+        '@typescript-eslint/no-floating-promises': 0,
         // RATIONALE:         Catches a common coding mistake.
         '@typescript-eslint/no-for-in-array': 2,
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -189,7 +189,7 @@ module.exports = {
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-control-regex': 2,
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-debugger': 1,
+        'no-debugger': 0,
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-delete-var': 2,
         // RATIONALE:         Catches code that is likely to be incorrect

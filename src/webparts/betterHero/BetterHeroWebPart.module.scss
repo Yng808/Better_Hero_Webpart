@@ -1,5 +1,9 @@
-@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
+//@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
+:root {
+  --hero-image-opacity: .5;
+}
 
+/*
 .betterHero {
   overflow: hidden;
   padding: 1em;
@@ -9,6 +13,7 @@
     font-family: $ms-font-family-fallbacks;
   }
 }
+
 
 .welcome {
   text-align: center;
@@ -32,3 +37,34 @@
     }
   }
 }
+*/
+
+
+
+  .cardHideOverflow {
+    /* Hide overflow to keep the zoom within the card */
+    overflow: hidden;
+  }
+  
+  .cardImgOverlay {
+    background: rgba(0, 0, 0, var(--hero-image-opacity));
+    bottom: 0;
+    top: auto;
+  }
+  
+  .leaderPhoto {
+    height: 200px;
+    object-fit: cover;
+    /* Smooth zoom transition */
+    transition: transform .3s ease-in-out !important;
+    
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  .card:hover .leaderPhoto {
+    /* Zoom in on hover */
+    transform: scale(1.05);
+  }

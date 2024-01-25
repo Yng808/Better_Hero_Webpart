@@ -1,33 +1,45 @@
 {
-  "name": "better_hero_webpart",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "all": "npm run build && npm run prod",
-    "build": "webpack --mode=development",
-    "prod": "webpack --mode=production",
-    "test": "npm run build && cd spfx && gulp serve"
+  "name": "better-hero",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=16.13.0 <17.0.0 || >=18.17.1 <19.0.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "^7.23.7",
-    "@babel/preset-env": "^7.23.8",
-    "babel-loader": "^9.1.3",
-    "css-loader": "^6.9.1",
-    "html-loader": "^5.0.0",
-    "sass": "^1.70.0",
-    "sass-loader": "^14.0.0",
-    "style-loader": "^3.3.4",
-    "ts-loader": "^9.5.1",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "gulp bundle",
+    "clean": "gulp clean",
+    "test": "gulp test",
+    "package": "gulp clean && gulp build --ship && gulp bundle --ship && gulp package-solution --ship"
+
   },
   "dependencies": {
+    "@microsoft/sp-component-base": "1.18.2",
+    "@microsoft/sp-core-library": "1.18.2",
+    "@microsoft/sp-lodash-subset": "1.18.2",
+    "@microsoft/sp-office-ui-fabric-core": "1.18.2",
+    "@microsoft/sp-property-pane": "1.18.2",
+    "@microsoft/sp-webpart-base": "1.18.2",
+    "datatables.net": "^1.13.8",
+    "datatables.net-bs5": "^1.13.8",
     "dattatable": "^2.9.65",
-    "gd-sprest-bs": "^10.11.3",
-    "moment": "^2.30.1"
+    "gd-sprest-bs": "^10.11.4",
+    "jquery": "^3.7.1",
+    "moment": "^2.30.1",
+    "tslib": "2.3.1"
+  },
+  "devDependencies": {
+    "@fluentui/react": "^8.106.4",
+    "@microsoft/eslint-config-spfx": "1.18.2",
+    "@microsoft/eslint-plugin-spfx": "1.18.2",
+    "@microsoft/rush-stack-compiler-4.7": "0.1.0",
+    "@microsoft/sp-build-web": "1.18.2",
+    "@microsoft/sp-module-interfaces": "1.18.2",
+    "@rushstack/eslint-config": "2.5.1",
+    "@types/webpack-env": "~1.15.2",
+    "ajv": "^6.12.5",
+    "eslint": "8.7.0",
+    "gulp": "4.0.2",
+    "typescript": "4.7.4"
   }
 }

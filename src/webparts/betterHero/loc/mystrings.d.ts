@@ -1,7 +1,9 @@
 declare interface IBetterHeroWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
-  DescriptionFieldLabel: string;
+  AddImageFieldLabel: string;
+  OpacityFieldLabel: string;
+  CardColFieldLabel: string;
   AppLocalEnvironmentSharePoint: string;
   AppLocalEnvironmentTeams: string;
   AppLocalEnvironmentOffice: string;

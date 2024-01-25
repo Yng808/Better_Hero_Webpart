@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
     "name": "better-hero-client-side-solution",
-    "id": "87b658de-3190-4eef-b701-dc7ba6411b8d",
-    "version": "1.0.0.0",
+    "id": "77645465-e030-47de-99c9-07f4f53f3b68",
+    "version": "0.0.0.1",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -29,12 +29,12 @@
       {
         "title": "better-hero Feature",
         "description": "The feature that activates elements of the better-hero solution.",
-        "id": "bfb4a547-3aef-45a3-a025-a276c95460e6",
+        "id": "91777c98-5799-464d-91c4-67da5717c563",
         "version": "1.0.0.0"
       }
     ]
   },
   "paths": {
-    "zippedPackage": "../../dist/sp-dashboard.sppkg"
+    "zippedPackage": "solution/better-hero.sppkg"
   }
 }
