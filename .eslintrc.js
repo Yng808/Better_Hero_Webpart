@@ -189,7 +189,7 @@ module.exports = {
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-control-regex': 2,
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-debugger': 1,
+        'no-debugger': 0,
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-delete-var': 2,
         // RATIONALE:         Catches code that is likely to be incorrect

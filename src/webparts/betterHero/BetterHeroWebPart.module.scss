@@ -1,5 +1,7 @@
 //@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
-
+:root {
+  --hero-image-opacity: .5;
+}
 
 /*
 .betterHero {
@@ -45,7 +47,7 @@
   }
   
   .cardImgOverlay {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, var(--hero-image-opacity));
     bottom: 0;
     top: auto;
   }

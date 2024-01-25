@@ -1,6 +1,7 @@
-import { Version } from '@microsoft/sp-core-library';
+import { Version, DisplayMode } from '@microsoft/sp-core-library';
 import {
    type IPropertyPaneConfiguration,
+   PropertyPaneSlider,
    PropertyPaneButton
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
@@ -11,14 +12,31 @@ import { Components, Helper } from 'gd-sprest-bs';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './BetterHeroWebPart.module.scss';
 
+
+/*
+* Need to re-size the images. Maybe give options for small, medium, large? Or allow person to specify height and width of the card?
+* Click and drag functionality to re-order? Or maybe create an order property?
+* Need to edit an item. Need to determine current mode. If in edit mode, need edit button under each image. (done)
+* Need to delete. (done)
+* Need Subtitle, the card overlay part. (done)
+* Tooltips. (done)
+* Opacity of the text-card-overlay. (done)
+* columns per row
+*/
+
+
 export interface IBetterHeroWebPartProps {
    images: string; //store as JSON string
+   opacity: number;
+   cardCols: number;
 }
 
 interface IImageInfo {
    image: string;
    title: string;
    url: string;
+   subtitle: string;
+   hoverText: string;
 }
 
 // Acceptable image file types
@@ -32,9 +50,20 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
    private form: Components.IForm;
 
    public render(): void {
+      if (!this.properties.cardCols) {
+         this.properties.cardCols = 4;
+      }
+      // see if opacity exists
+      if (this.properties.opacity >= 0 && this.properties.opacity <= 100) {
+         const root = document.querySelector(':root') as HTMLElement;
+         root.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
+      }
+
+
       // convert the images property to an array
       if (this.properties.images) {
          try {
+            // convert the JSON stringified string back to it's original form, the array
             this.imagesInfo = JSON.parse(this.properties.images);
          } catch (error) {
             this.imagesInfo = [];
@@ -45,12 +74,76 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       }
 
       // render the images
-      this.renderImages();
+      this.renderCards();
 
    }
 
-   private renderImages(): void {
-      let html = '';
+   // render card. pass in input variables
+   private renderCard(idx: number): HTMLElement {
+      const imageInfo: IImageInfo = this.imagesInfo[idx];
+      const isInEditMode = this.displayMode === DisplayMode.Edit;
+      const elCard = document.createElement('div');
+      //elCard.classList.add('col-md-6', 'col-lg-3');
+
+
+      elCard.innerHTML = `
+         
+            <a href="${isInEditMode ? '#' : imageInfo.url}">
+               <div class="card bg-dark text-white" style="overflow: hidden;">
+                  <img src="${imageInfo.image}" class="card-img ${styles.leaderPhoto}" alt="${imageInfo.title}">
+                  <div class="card-img-overlay ${styles.cardImgOverlay}">
+                        <h5 class="card-title">${imageInfo.title}</h5>
+                        <p class="card-text">${imageInfo.subtitle || ''}</p>
+                  </div>    
+               </div>             
+            </a>
+
+            ${isInEditMode ? '<div class="card card-buttons"></div>' : ''}
+         `;
+
+      if (isInEditMode) {
+         //render buttons
+         Components.ButtonGroup({
+            el: elCard.querySelector('.card-buttons') as HTMLElement,
+            isSmall: true,
+            buttons: [
+               {
+                  text: 'Edit',
+                  type: Components.ButtonTypes.OutlinePrimary,
+                  onClick: () => {
+                     // todo
+                     this.renderForm(idx);
+                  }
+               },
+               {
+                  text: 'Delete',
+                  type: Components.ButtonTypes.OutlineDanger,
+                  onClick: () => {
+                     // get element from array where image = selected one?, then delete
+                     this.imagesInfo.splice(idx, 1);
+                     this.properties.images = JSON.stringify(this.imagesInfo);
+
+                     this.render();
+                  }
+               }
+            ]
+         })
+      }
+
+      if (imageInfo.hoverText) {
+         Components.Tooltip({
+            content: imageInfo.hoverText,
+            target: elCard.querySelector('.card') as HTMLElement,
+            type: Components.TooltipTypes.Info
+         })
+      }
+
+      return elCard;
+   }
+
+
+   private renderCards(): void {
+      this.domElement.innerHTML = '';
 
       // check if images don't exist. If no images, display a message to guide the user to upload.
       if (this.imagesInfo.length === 0) {
@@ -59,31 +152,33 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       }
 
       // bootstrap container to make it responsive
-      html += `
-         <div class="container my-2">
-            <div class="row g-2">
-      `;
+      const elContainer = document.createElement('div');
+      elContainer.classList.add('container', 'my-2');
+      this.domElement.appendChild(elContainer);
 
+      const elRows = document.createElement('div');
+      elRows.classList.add('row', 'g-2', 'row-cols-md-2', 'row-cols-sm-1', `row-cols-lg-${this.properties.cardCols}`); // add row-col-{num}
+      elContainer.appendChild(elRows);
+
+
+
+
+
+      // debugger;
       // make a bootstrap card for each image in the array
-      for (const imageInfo of this.imagesInfo) {
-         html += `
-            <div class="col-md-6 col-lg-3">
-                  <a href="${imageInfo.url}">
-                     <div class="card bg-dark text-white" style="overflow: hidden;">
-                        <img src="${imageInfo.image}" class="card-img ${styles.leaderPhoto}" alt="${imageInfo.title}">
-                        <div class="card-img-overlay ${styles.cardImgOverlay}">
-                              <h5 class="card-title">${imageInfo.title}</h5>
-                              <p class="card-text">To do later</p>
-                        </div>
-                     </div>
-                  </a>
-            </div>`;
+      //for (const imageInfo of this.imagesInfo) {
+      for (let i = 0; i < this.imagesInfo.length; i++) {
+         const elCol = document.createElement('div');
+         elCol.classList.add('col-xs-1');
+         elRows.appendChild(elCol);
+
+         const elCard = this.renderCard(i);
+         elCol.appendChild(elCard);
       }
 
-      html += `</div>
-               </div>`;
 
-      this.domElement.innerHTML = html;
+      //this.domElement.innerHTML = html;
+      // to clear out any javascript do this.domElement.innerHTML = this.domElement.innerHTML
    }
 
    // Determines if the image extension is valid
@@ -104,28 +199,47 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       return isValid;
    }
 
-   private renderForm(): void {
+   private renderForm(idx: number = -1): void {
+      const imageInfo = this.imagesInfo[idx];
+      //set header
+      Modal.clear();
+      Modal.setHeader('Add image link');
+
+
       // render the form
       this.form = Components.Form({
          el: Modal.BodyElement,
+         value: imageInfo,
          controls: [
             //title, image, url
             {
-               name: 'Title',
+               name: 'title',
                label: 'Title:',
                type: Components.FormControlTypes.TextField,
                required: true,
                errorMessage: 'Must specify a Title'
             },
             {
-               name: 'Link',
+               name: 'url',
                label: 'Link/Url:',
                type: Components.FormControlTypes.TextField,
                required: true,
                errorMessage: 'Must specify a Link/Url'
             },
             {
-               name: 'Image',
+               name: 'subtitle',
+               label: 'Subtitle',
+               type: Components.FormControlTypes.TextField,
+               required: true,
+               errorMessage: 'Must specify a subtitle'
+            },
+            {
+               name: 'hoverText',
+               label: 'Hover Text',
+               type: Components.FormControlTypes.TextArea
+            },
+            {
+               name: 'image',
                label: 'Image:',
                type: Components.FormControlTypes.TextField,
                required: true,
@@ -181,6 +295,56 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
          ]
       })
 
+      // render footer actions : save and cancel buttons
+      Components.TooltipGroup({
+         el: Modal.FooterElement,
+         tooltips: [
+            {
+               content: 'save the image link',
+               btnProps: {
+                  text: imageInfo ? 'Update' : 'Save',
+                  type: Components.ButtonTypes.OutlinePrimary,
+                  onClick: () => {
+                     // ensure form is valid
+                     if (this.form.isValid()) {
+                        // get the form values
+                        const formValues = this.form.getValues() as IImageInfo;
+
+                        if (imageInfo) {
+                           this.imagesInfo[idx] = formValues;
+                        }
+                        else {
+                           // add object to the array
+                           this.imagesInfo.push(formValues);
+                        }
+
+
+                        // Stringify because web part properties can only hold strings, numbers, and booleans
+                        this.properties.images = JSON.stringify(this.imagesInfo);
+
+                        this.render();
+
+                        Modal.hide();
+                     }
+                  }
+
+               }
+            },
+            {
+               content: 'Close the dialog',
+               btnProps: {
+                  text: 'Cancel',
+                  type: Components.ButtonTypes.OutlineInfo,
+                  onClick: () => {
+                     Modal.hide()
+                  }
+
+               }
+            }
+         ]
+      })
+      Modal.show()
+
    }
 
    protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
@@ -220,64 +384,24 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                            text: strings.AddImageFieldLabel,
                            onClick: () => {
 
-                              //set header
-                              Modal.clear();
-                              Modal.setHeader('Add image link');
 
                               // display a form
                               this.renderForm();
 
-                              // render footer actions : save and cancel buttons
-                              Components.TooltipGroup({
-                                 el: Modal.FooterElement,
-                                 tooltips: [
-                                    {
-                                       content: 'save the image link',
-                                       btnProps: {
-                                          text: 'Save',
-                                          type: Components.ButtonTypes.OutlinePrimary,
-                                          onClick: () => {
-                                             // ensure form is valid
-                                             if (this.form.isValid()) {
-                                                // get the form values
-                                                const formValues = this.form.getValues();
 
-                                                // put the values into an IImageInfo object
-                                                const newImageInfo: IImageInfo = {
-                                                   image: formValues.Image,
-                                                   title: formValues.Title,
-                                                   url: formValues.Link
-                                                };
-
-                                                // add object to the array
-                                                this.imagesInfo.push(newImageInfo);
-
-                                                // Stringify because web part properties can only hold strings, numbers, and booleans
-                                                this.properties.images = JSON.stringify(this.imagesInfo);
-
-                                                this.render();
-
-                                                Modal.hide();
-                                             }
-                                          }
-
-                                       }
-                                    },
-                                    {
-                                       content: 'Close the dialog',
-                                       btnProps: {
-                                          text: 'Cancel',
-                                          type: Components.ButtonTypes.OutlineInfo,
-                                          onClick: () => {
-                                             Modal.hide()
-                                          }
-
-                                       }
-                                    }
-                                 ]
-                              })
-                              Modal.show()
                            }
+                        }),
+                        PropertyPaneSlider('opacity', {
+                           label: strings.OpacityFieldLabel,
+                           min: 0,
+                           max: 100,
+                           showValue: true
+                        }),
+                        PropertyPaneSlider('cardCols', {
+                           label: strings.CardColFieldLabel,
+                           min: 1,
+                           max: 12,
+                           showValue: true
                         })
                      ]
                   }
