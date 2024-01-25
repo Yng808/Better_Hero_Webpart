@@ -1,255 +1,289 @@
 import { Version } from '@microsoft/sp-core-library';
 import {
-  type IPropertyPaneConfiguration,
-  PropertyPaneButton
+   type IPropertyPaneConfiguration,
+   PropertyPaneButton
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import type { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'BetterHeroWebPartStrings';
 import { Modal, LoadingDialog } from 'dattatable';
 import { Components, Helper } from 'gd-sprest-bs';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export interface IBetterHeroWebPartProps {
-  images: string; //store as JSON string
+   images: string; //store as JSON string
 }
 
-
 interface IImageInfo {
-  image: string;
-  title: string;
-  url: string;
+   image: string;
+   title: string;
+   url: string;
 }
 
 // Acceptable image file types
 const ImageExtensions = [
-  ".apng", ".avif", ".bmp", ".gif", ".jpg", ".jpeg", ".jfif", ".ico",
-  ".pjpeg", ".pjp", ".png", ".svg", ".svgz", ".tif", ".tiff", ".webp", ".xbm"
+   ".apng", ".avif", ".bmp", ".gif", ".jpg", ".jpeg", ".jfif", ".ico",
+   ".pjpeg", ".pjp", ".png", ".svg", ".svgz", ".tif", ".tiff", ".webp", ".xbm"
 ];
 
-
 export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHeroWebPartProps> {
-  private imagesInfo: IImageInfo[];
-  private form: Components.IForm;
+   private imagesInfo: IImageInfo[];
+   private form: Components.IForm;
 
-  public render(): void {
-    // convert the images property to an array
-    if (this.properties.images) {
-      try {
-        this.imagesInfo = JSON.parse(this.properties.images);
-      } catch (error) {
-        this.imagesInfo = [];
+   public render(): void {
+      // convert the images property to an array
+      if (this.properties.images) {
+         try {
+            this.imagesInfo = JSON.parse(this.properties.images);
+         } catch (error) {
+            this.imagesInfo = [];
+         }
       }
-    }
-    else {
-      this.imagesInfo = [];
-    }
-
-    // render the images
-    this.renderImages();
-
-  }
-
-  private renderImages(): void {
-    // see if images don't exist
-    if (this.imagesInfo.length === 0) {
-      this.domElement.innerHTML = 'There are no images. Edit the web part properties and add images.';
-      return;
-    }
-
-
-    for (let i = 0; i < this.imagesInfo.length; i++) {
-      //let imagesInfo = this.imagesInfo[i];
-    }
-
-    this.domElement.innerHTML = `    
-      Todo
-    `;
-  }
-
-  // Determines if the image extension is valid
-  private isImageFile(fileName: string): boolean {
-    let isValid = false;
-
-    // Parse the valid file extensions
-    for (let i = 0; i < ImageExtensions.length; i++) {
-      // See if this is a valid file extension
-      if (fileName.endsWith(ImageExtensions[i])) {
-        // Set the flag and break from the loop
-        isValid = true;
-        break;
+      else {
+         this.imagesInfo = [];
       }
-    }
 
-    // Return the flag
-    return isValid;
-  }
+      // render the images
+      this.renderImages();
 
+   }
 
-  private renderForm(): void {
-    // render the form
-    this.form = Components.Form({
-      el: Modal.BodyElement,
-      controls: [
-        //title, image, url
-        {
-          label: 'Title:',
-          type: Components.FormControlTypes.TextField,
-          required: true,
-          errorMessage: 'Must specify a Title'
-        },
-        {
-          label: 'Link/Url:',
-          type: Components.FormControlTypes.TextField,
-          required: true,
-          errorMessage: 'Must specify a Link/Url'
-        },
-        {
-          label: 'Image:',
-          type: Components.FormControlTypes.TextField,
-          required: true,
-          errorMessage: 'Must specify a Link/Url',
-          onControlRendered: (ctrl) => {
-            // Set a tooltip
-            Components.Tooltip({
-              content: "Click to upload an image file.",
-              target: ctrl.textbox.elTextbox
-            });
+   private renderImages(): void {
+      let html = '';
 
-            // Make this textbox read-only
-            ctrl.textbox.elTextbox.readOnly = true;
+      // see if images don't exist. If no images, display a message to guide the user to upload.
+      if (this.imagesInfo.length === 0) {
+         this.domElement.innerHTML = 'There are no images. Edit the web part properties and add images.';
+         return;
+      }
 
-            // Set a click event
-            ctrl.textbox.elTextbox.addEventListener("click", () => {
-              // Display a file upload dialog
-              Helper.ListForm.showFileDialog(["image/*"]).then(file => {
-                // Clear the value
-                ctrl.textbox.setValue("");
+      html += `
+         <div class="container my-5">
+            <div class="row g-2">
+      `;
 
-                // Get the file name
-                let fileName = file.name.toLowerCase();
+      // make a bootstrap card for each image in the array
+      for (const imageInfo of this.imagesInfo) {
+         html += `
+            <div class="col-md-6 col-lg-3">
+                  <a href="${imageInfo.url}">
+                     <div class="card bg-dark text-white">
+                        <img src="${imageInfo.image}" class="card-img leaderPhoto" alt="${imageInfo.title}">
+                        <div class="cardImgOverlay">
+                              <h5 class="card-title">${imageInfo.title}</h5>
+                              <p class="card-text">To do later</p>
+                        </div>
+                     </div>
+                  </a>
+            </div>`;
+      }
 
-                // Validate the file type
-                if (this.isImageFile(fileName)) {
-                  // Show a loading dialog
-                  LoadingDialog.setHeader("Reading the File");
-                  LoadingDialog.setBody("This will close after the file is converted...");
-                  LoadingDialog.show();
+      html += `</div>
+               </div>`;
 
-                  // Convert the file
-                  let reader = new FileReader();
-                  reader.onloadend = () => {
-                    // Set the value
-                    ctrl.textbox.setValue(reader.result as string);
+      this.domElement.innerHTML = html;
+   }
 
-                    // Close the dialog
-                    LoadingDialog.hide();
-                  }
-                  reader.readAsDataURL(file.src);
-                } else {
-                  // Display an error message
-                  ctrl.updateValidation(ctrl.el, {
-                    isValid: false,
-                    invalidMessage: "The file must be a valid image file. Valid types: png, svg, jpg, gif"
-                  });
-                }
-              });
-            });
+   // Determines if the image extension is valid
+   private isImageFile(fileName: string): boolean {
+      let isValid = false;
 
+      // Parse the valid file extensions
+      for (let i = 0; i < ImageExtensions.length; i++) {
+         // See if this is a valid file extension
+         if (fileName.endsWith(ImageExtensions[i])) {
+            // Set the flag and break from the loop
+            isValid = true;
+            break;
+         }
+      }
 
-          }
-        },
+      // Return the flag
+      return isValid;
+   }
 
-      ]
-    })
-
-  }
-
-
-  protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
-    if (!currentTheme) {
-      return;
-    }
-
-
-    const {
-      semanticColors
-    } = currentTheme;
-
-    if (semanticColors) {
-      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-      this.domElement.style.setProperty('--link', semanticColors.link || null);
-      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
-    }
-
-  }
-
-  protected get dataVersion(): Version {
-    return Version.parse('1.0');
-  }
-
-  protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
-    return {
-      pages: [
-        {
-          header: {
-            description: strings.PropertyPaneDescription
-          },
-          groups: [
+   private renderForm(): void {
+      // render the form
+      this.form = Components.Form({
+         el: Modal.BodyElement,
+         controls: [
+            //title, image, url
             {
-              groupName: strings.BasicGroupName,
-              groupFields: [
-                PropertyPaneButton('', {
-                  text: strings.AddImageFieldLabel,
-                  onClick: () => {
+               name: 'Title',
+               label: 'Title:',
+               type: Components.FormControlTypes.TextField,
+               required: true,
+               errorMessage: 'Must specify a Title'
+            },
+            {
+               name: 'Link',
+               label: 'Link/Url:',
+               type: Components.FormControlTypes.TextField,
+               required: true,
+               errorMessage: 'Must specify a Link/Url'
+            },
+            {
+               name: 'Image',
+               label: 'Image:',
+               type: Components.FormControlTypes.TextField,
+               required: true,
+               errorMessage: 'Must specify a Link/Url',
+               onControlRendered: (ctrl) => {
+                  // Set a tooltip
+                  Components.Tooltip({
+                     content: "Click to upload an image file.",
+                     target: ctrl.textbox.elTextbox
+                  });
 
-                    //set header
-                    Modal.clear();
-                    Modal.setHeader('Add image link');
+                  // Make this textbox read-only
+                  ctrl.textbox.elTextbox.readOnly = true;
 
-                    // display a form
-                    this.renderForm();
+                  // Set a click event
+                  ctrl.textbox.elTextbox.addEventListener("click", () => {
+                     // Display a file upload dialog
+                     Helper.ListForm.showFileDialog(["image/*"]).then(file => {
+                        // Clear the value
+                        ctrl.textbox.setValue("");
 
-                    // render footer actions : save and cancel buttons
-                    Components.TooltipGroup({
-                      el: Modal.FooterElement,
-                      tooltips: [
-                        {
-                          content: 'save the image link',
-                          btnProps: {
-                            text: 'Save',
-                            type: Components.ButtonTypes.OutlinePrimary,
-                            onClick: () => {
-                              // ensure form is valid
-                              if (this.form.isValid()) {
-                                // todo this.form.getvalues. Go back to form, fill out name properties. Proeprty called name. This.form.getvalues() returns object  with keys. key matches the name of the form control
-                                // the value of it is the value of the form. Create an object, add it to IImageInfo, push the object into the array. After this, save it. JSON stringify it, then save web part property.
-                                // It should re-render the form after. After form re-renders, fill out renderImages() method. Just do this as pure html. need to consider editing an item, cleaning up code, separate out the new methods.
-                              }
-                            }
+                        // Get the file name
+                        let fileName = file.name.toLowerCase();
 
-                          }
-                        },
-                        {
-                          content: 'Close the dialog',
-                          btnProps: {
-                            text: 'Cancel',
-                            type: Components.ButtonTypes.OutlineInfo,
-                            onClick: () => {
-                              Modal.hide()
-                            }
+                        // Validate the file type
+                        if (this.isImageFile(fileName)) {
+                           // Show a loading dialog
+                           LoadingDialog.setHeader("Reading the File");
+                           LoadingDialog.setBody("This will close after the file is converted...");
+                           LoadingDialog.show();
 
-                          }
+                           // Convert the file
+                           let reader = new FileReader();
+                           reader.onloadend = () => {
+                              // Set the value
+                              ctrl.textbox.setValue(reader.result as string);
+
+                              // Close the dialog
+                              LoadingDialog.hide();
+                           }
+                           reader.readAsDataURL(file.src);
+                        } else {
+                           // Display an error message
+                           ctrl.updateValidation(ctrl.el, {
+                              isValid: false,
+                              invalidMessage: "The file must be a valid image file. Valid types: png, svg, jpg, gif"
+                           });
                         }
-                      ]
-                    })
-                    Modal.show()
+                     });
+                  });
+               }
+            },
+         ]
+      })
+
+   }
+
+   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
+      if (!currentTheme) {
+         return;
+      }
+
+
+      const {
+         semanticColors
+      } = currentTheme;
+
+      if (semanticColors) {
+         this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
+         this.domElement.style.setProperty('--link', semanticColors.link || null);
+         this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
+      }
+
+   }
+
+   protected get dataVersion(): Version {
+      return Version.parse('1.0');
+   }
+
+   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+      return {
+         pages: [
+            {
+               header: {
+                  description: strings.PropertyPaneDescription
+               },
+               groups: [
+                  {
+                     groupName: strings.BasicGroupName,
+                     groupFields: [
+                        PropertyPaneButton('', {
+                           text: strings.AddImageFieldLabel,
+                           onClick: () => {
+
+                              //set header
+                              Modal.clear();
+                              Modal.setHeader('Add image link');
+
+                              // display a form
+                              this.renderForm();
+
+                              // render footer actions : save and cancel buttons
+                              Components.TooltipGroup({
+                                 el: Modal.FooterElement,
+                                 tooltips: [
+                                    {
+                                       content: 'save the image link',
+                                       btnProps: {
+                                          text: 'Save',
+                                          type: Components.ButtonTypes.OutlinePrimary,
+                                          onClick: () => {
+                                             // ensure form is valid
+                                             if (this.form.isValid()) {
+                                                // todo
+                                                // get the form values
+                                                const formValues = this.form.getValues();
+
+                                                // put the values into an IImageInfo object
+                                                const newImageInfo: IImageInfo = {
+                                                   image: formValues.Image,
+                                                   title: formValues.Title,
+                                                   url: formValues.Link
+                                                };
+
+                                                // add object to the array
+                                                this.imagesInfo.push(newImageInfo);
+
+                                                // Stringify because web part properties can only hold strings, numbers, and booleans
+                                                this.properties.images = JSON.stringify(this.imagesInfo);
+
+                                                this.render();
+
+                                                Modal.hide();
+                                             }
+                                          }
+
+                                       }
+                                    },
+                                    {
+                                       content: 'Close the dialog',
+                                       btnProps: {
+                                          text: 'Cancel',
+                                          type: Components.ButtonTypes.OutlineInfo,
+                                          onClick: () => {
+                                             Modal.hide()
+                                          }
+
+                                       }
+                                    }
+                                 ]
+                              })
+                              Modal.show()
+                           }
+                        })
+                     ]
                   }
-                })
-              ]
+               ]
             }
-          ]
-        }
-      ]
-    };
-  }
+         ]
+      };
+   }
+
 }
