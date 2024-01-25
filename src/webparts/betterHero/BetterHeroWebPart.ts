@@ -239,7 +239,6 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                                           onClick: () => {
                                              // ensure form is valid
                                              if (this.form.isValid()) {
-                                                // todo
                                                 // get the form values
                                                 const formValues = this.form.getValues();
 
