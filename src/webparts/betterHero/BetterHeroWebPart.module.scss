@@ -1,4 +1,4 @@
-@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
+//@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
 
 /*
@@ -39,25 +39,30 @@
 
 
 
-  .card {
+  .cardHideOverflow {
     /* Hide overflow to keep the zoom within the card */
-    overflow: hidden !important;
+    overflow: hidden;
   }
   
   .cardImgOverlay {
-    background: rgba(0, 0, 0, 0.5) !important;
-    bottom: 0 !important;
-    top: auto !important;
+    background: rgba(0, 0, 0, 0.5);
+    bottom: 0;
+    top: auto;
   }
   
   .leaderPhoto {
-    height: 350px !important;
-    object-fit: cover !important;
+    height: 200px;
+    object-fit: cover;
     /* Smooth zoom transition */
     transition: transform .3s ease-in-out !important;
+    
+
+    &:hover {
+      transform: scale(1.05);
+    }
   }
   
   .card:hover .leaderPhoto {
     /* Zoom in on hover */
-    transform: scale(1.05) !important;
+    transform: scale(1.05);
   }

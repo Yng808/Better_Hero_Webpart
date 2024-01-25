@@ -9,6 +9,8 @@ import * as strings from 'BetterHeroWebPartStrings';
 import { Modal, LoadingDialog } from 'dattatable';
 import { Components, Helper } from 'gd-sprest-bs';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import styles from './BetterHeroWebPart.module.scss';
+
 
 export interface IBetterHeroWebPartProps {
    images: string; //store as JSON string
@@ -58,7 +60,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       }
 
       html += `
-         <div class="container my-5">
+         <div class="container my-2">
             <div class="row g-2">
       `;
 
@@ -67,9 +69,9 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
          html += `
             <div class="col-md-6 col-lg-3">
                   <a href="${imageInfo.url}">
-                     <div class="card bg-dark text-white">
-                        <img src="${imageInfo.image}" class="card-img leaderPhoto" alt="${imageInfo.title}">
-                        <div class="cardImgOverlay">
+                     <div class="card bg-dark text-white" style="overflow: hidden;">
+                        <img src="${imageInfo.image}" class="card-img ${styles.leaderPhoto}" alt="${imageInfo.title}">
+                        <div class="card-img-overlay ${styles.cardImgOverlay}">
                               <h5 class="card-title">${imageInfo.title}</h5>
                               <p class="card-text">To do later</p>
                         </div>
