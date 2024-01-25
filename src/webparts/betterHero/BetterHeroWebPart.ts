@@ -262,7 +262,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                         ctrl.textbox.setValue("");
 
                         // Get the file name
-                        let fileName = file.name.toLowerCase();
+                        const fileName = file.name.toLowerCase();
 
                         // Validate the file type
                         if (this.isImageFile(fileName)) {
@@ -272,7 +272,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                            LoadingDialog.show();
 
                            // Convert the file
-                           let reader = new FileReader();
+                           const reader = new FileReader();
                            reader.onloadend = () => {
                               // Set the value
                               ctrl.textbox.setValue(reader.result as string);
