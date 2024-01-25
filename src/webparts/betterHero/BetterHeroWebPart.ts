@@ -11,7 +11,6 @@ import { Components, Helper } from 'gd-sprest-bs';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './BetterHeroWebPart.module.scss';
 
-
 export interface IBetterHeroWebPartProps {
    images: string; //store as JSON string
 }
@@ -53,12 +52,13 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
    private renderImages(): void {
       let html = '';
 
-      // see if images don't exist. If no images, display a message to guide the user to upload.
+      // check if images don't exist. If no images, display a message to guide the user to upload.
       if (this.imagesInfo.length === 0) {
          this.domElement.innerHTML = 'There are no images. Edit the web part properties and add images.';
          return;
       }
 
+      // bootstrap container to make it responsive
       html += `
          <div class="container my-2">
             <div class="row g-2">
