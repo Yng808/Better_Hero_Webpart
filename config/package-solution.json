@@ -3,7 +3,7 @@
   "solution": {
     "name": "better-hero-client-side-solution",
     "id": "77645465-e030-47de-99c9-07f4f53f3b68",
-    "version": "1.0.0.0",
+    "version": "0.0.0.1",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
