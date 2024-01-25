@@ -134,7 +134,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
          Components.Tooltip({
             content: imageInfo.hoverText,
             target: elCard.querySelector('.card') as HTMLElement,
-            type: Components.TooltipTypes.Info
+            type: Components.TooltipTypes.LightBorder
          })
       }
 
