@@ -23,7 +23,8 @@
     "description": { "default": "BetterHero description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "BetterHero"
+      "opacity": 50,
+      "cardCols": 4
     }
   }]
 }
