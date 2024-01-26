@@ -92,8 +92,8 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                <div class="card bg-dark text-white" style="overflow: hidden;">
                   <img src="${imageInfo.image}" class="card-img ${styles.leaderPhoto}" alt="${imageInfo.title}">
                   <div class="card-img-overlay ${styles.cardImgOverlay}">
-                        <h5 class="card-title">${imageInfo.title}</h5>
-                        <p class="card-text">${imageInfo.subtitle || ''}</p>
+                        <h5 class="card-title ${styles.textTruncate}">${imageInfo.title}</h5>
+                        <p class="card-text ${styles.textTruncate}">${imageInfo.subtitle || ''}</p>
                   </div>    
                </div>             
             </a>

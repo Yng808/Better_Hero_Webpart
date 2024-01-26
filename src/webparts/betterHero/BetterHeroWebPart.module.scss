@@ -39,7 +39,13 @@
 }
 */
 
-
+  .textTruncate {
+    /* Truncate the text on the title or text of the card */
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
 
   .cardHideOverflow {
     /* Hide overflow to keep the zoom within the card */
