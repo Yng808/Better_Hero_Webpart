@@ -1,6 +1,6 @@
 define([], function () {
   return {
-    //"PropertyPaneDescription": "Description",
+    "PropertyPaneDescription": "",
     "BasicGroupName": "",
     "AddImageFieldLabel": "Add an image",
     "OpacityFieldLabel": "Opacity of the text overlay",

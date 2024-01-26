@@ -1,5 +1,5 @@
 declare interface IBetterHeroWebPartStrings {
-  //PropertyPaneDescription: string;
+  PropertyPaneDescription: string;
   BasicGroupName: string;
   AddImageFieldLabel: string;
   OpacityFieldLabel: string;

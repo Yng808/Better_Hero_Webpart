@@ -153,7 +153,10 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
 
       // bootstrap container to make it responsive
       const elContainer = document.createElement('div');
-      elContainer.classList.add('container', 'my-2');
+      elContainer.classList.add('container-fluid', 'my-2');
+      if (this.isFullWidthSection()) {
+         elContainer.style.marginLeft = "11px";
+      }
       this.domElement.appendChild(elContainer);
 
       const elRows = document.createElement('div');
@@ -192,6 +195,21 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
 
       // this.domElement.innerHTML = html;
       // to clear out any javascript do this.domElement.innerHTML = this.domElement.innerHTML
+   }
+
+   private isFullWidthSection(): boolean {
+      let element: HTMLElement | null = this.domElement;
+
+      while (element) {
+         if (element.classList && element.classList.contains('CanvasZone--fullWidth')) {
+            // Class found, this is a full-width section
+            return true;
+         }
+         element = element.parentElement;
+      }
+
+      // Full-width section class not found
+      return false;
    }
 
    private getCustomColumnLayoutClass(cardCols: number): string {
