@@ -157,28 +157,66 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       this.domElement.appendChild(elContainer);
 
       const elRows = document.createElement('div');
-      elRows.classList.add('row', 'g-2', 'row-cols-md-2', 'row-cols-sm-1', `row-cols-lg-${this.properties.cardCols}`); // add row-col-{num}
+
+      // use custom column layouts when greater than 6 because bootstrap doesn't handle it nicely
+      if (this.properties.cardCols <= 6) {
+         // add row-cols-{num}
+         elRows.classList.add('row', 'g-2', 'row-cols-md-2', 'row-cols-sm-1', `row-cols-lg-${this.properties.cardCols}`);
+      }
+      else {
+         elRows.classList.add('row', 'g-2');
+      }
+
       elContainer.appendChild(elRows);
-
-
-
-
 
       // debugger;
       // make a bootstrap card for each image in the array
-      //for (const imageInfo of this.imagesInfo) {
       for (let i = 0; i < this.imagesInfo.length; i++) {
          const elCol = document.createElement('div');
-         elCol.classList.add('col-xs-1');
+
+         if (this.properties.cardCols <= 6) {
+            elCol.classList.add('col-xs-1');
+         }
+         else {
+            elCol.classList.add(`${styles.customCol}`, `${this.getCustomColumnLayoutClass(this.properties.cardCols)}`);
+
+         }
+
+
+
          elRows.appendChild(elCol);
 
          const elCard = this.renderCard(i);
          elCol.appendChild(elCard);
       }
 
-
-      //this.domElement.innerHTML = html;
+      // this.domElement.innerHTML = html;
       // to clear out any javascript do this.domElement.innerHTML = this.domElement.innerHTML
+   }
+
+   private getCustomColumnLayoutClass(cardCols: number): string {
+      let customColumnLayoutClass: string = '';
+      switch (cardCols) {
+         case 7:
+            customColumnLayoutClass = styles.customCol7;
+            break;
+         case 8:
+            customColumnLayoutClass = styles.customCol8;
+            break;
+         case 9:
+            customColumnLayoutClass = styles.customCol9;
+            break;
+         case 10:
+            customColumnLayoutClass = styles.customCol10;
+            break;
+         case 11:
+            customColumnLayoutClass = styles.customCol11;
+            break;
+         case 12:
+            customColumnLayoutClass = styles.customCol12;
+            break;
+      }
+      return customColumnLayoutClass;
    }
 
    // Determines if the image extension is valid

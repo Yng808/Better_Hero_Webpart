@@ -1,8 +1,8 @@
 define([], function () {
   return {
-    "PropertyPaneDescription": "Description",
-    "BasicGroupName": "Group Name",
-    "AddImageFieldLabel": "Add link",
+    //"PropertyPaneDescription": "Description",
+    "BasicGroupName": "",
+    "AddImageFieldLabel": "Add an image",
     "OpacityFieldLabel": "Opacity of the text overlay",
     "CardColFieldLabel": "Number of columns per row",
     "AppLocalEnvironmentSharePoint": "The app is running on your local environment as SharePoint web part",
