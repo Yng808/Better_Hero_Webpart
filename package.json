@@ -10,6 +10,7 @@
     "build": "gulp bundle",
     "clean": "gulp clean",
     "test": "gulp test",
+    "increment-version": "node ./incrementVersion.js",
     "package": "gulp clean && gulp build --ship && gulp bundle --ship && gulp package-solution --ship"
 
   },
