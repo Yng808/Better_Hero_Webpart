@@ -12,23 +12,11 @@ import { Components, Helper } from 'gd-sprest-bs';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './BetterHeroWebPart.module.scss';
 
-
-/*
-* Need to re-size the images. Maybe give options for small, medium, large? Or allow person to specify height and width of the card?
-* Click and drag functionality to re-order? Or maybe create an order property?
-* Need to edit an item. Need to determine current mode. If in edit mode, need edit button under each image. (done)
-* Need to delete. (done)
-* Need Subtitle, the card overlay part. (done)
-* Tooltips. (done)
-* Opacity of the text-card-overlay. (done)
-* columns per row
-*/
-
-
 export interface IBetterHeroWebPartProps {
    images: string; //store as JSON string
    opacity: number;
    cardCols: number;
+   cardHeight: number;
 }
 
 interface IImageInfo {
@@ -50,15 +38,21 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
    private form: Components.IForm;
 
    public render(): void {
+      const root = document.querySelector(':root') as HTMLElement;
+
       if (!this.properties.cardCols) {
          this.properties.cardCols = 4;
       }
       // see if opacity exists
       if (this.properties.opacity >= 0 && this.properties.opacity <= 100) {
-         const root = document.querySelector(':root') as HTMLElement;
+         //const root = document.querySelector(':root') as HTMLElement;
          root.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
       }
 
+      // see if height exists
+      if (this.properties.cardHeight >= 200 && this.properties.cardHeight <= 400) {
+         root.style.setProperty('--hero-image-height', (this.properties.cardHeight).toString() + 'px');
+      }
 
       // convert the images property to an array
       if (this.properties.images) {
@@ -77,6 +71,8 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       this.renderCards();
 
    }
+
+
 
    // render card. pass in input variables
    private renderCard(idx: number): HTMLElement {
@@ -457,6 +453,12 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                            label: strings.CardColFieldLabel,
                            min: 1,
                            max: 12,
+                           showValue: true
+                        }),
+                        PropertyPaneSlider('cardHeight', {
+                           label: strings.CardHeightFieldLabel,
+                           min: 200,
+                           max: 400,
                            showValue: true
                         })
                      ]

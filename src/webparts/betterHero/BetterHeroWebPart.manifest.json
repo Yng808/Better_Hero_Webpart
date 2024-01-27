@@ -24,7 +24,8 @@
     "officeFabricIconFontName": "Page",
     "properties": {
       "opacity": 50,
-      "cardCols": 4
+      "cardCols": 4,
+      "cardHeight": 200
     }
   }]
 }
