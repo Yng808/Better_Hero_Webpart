@@ -1,6 +1,8 @@
 //@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
   :root {
     --hero-image-opacity: .5;
+    --hero-image-height: 200px;
+    --hero-image-text-overlay-background: rgba(0, 0, 0, var(--hero-image-opacity));
   }
 
   .textTruncate {
@@ -17,7 +19,7 @@
   }
   
   .cardImgOverlay {
-    background: rgba(0, 0, 0, var(--hero-image-opacity));
+    background: var(--hero-image-text-overlay-background);
     bottom: 0;
     top: auto;
   }
