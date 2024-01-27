@@ -2,7 +2,8 @@ import { Version, DisplayMode } from '@microsoft/sp-core-library';
 import {
    type IPropertyPaneConfiguration,
    PropertyPaneSlider,
-   PropertyPaneButton
+   PropertyPaneButton,
+   PropertyPaneDropdown
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import type { IReadonlyTheme } from '@microsoft/sp-component-base';
@@ -12,23 +13,12 @@ import { Components, Helper } from 'gd-sprest-bs';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './BetterHeroWebPart.module.scss';
 
-
-/*
-* Need to re-size the images. Maybe give options for small, medium, large? Or allow person to specify height and width of the card?
-* Click and drag functionality to re-order? Or maybe create an order property?
-* Need to edit an item. Need to determine current mode. If in edit mode, need edit button under each image. (done)
-* Need to delete. (done)
-* Need Subtitle, the card overlay part. (done)
-* Tooltips. (done)
-* Opacity of the text-card-overlay. (done)
-* columns per row
-*/
-
-
 export interface IBetterHeroWebPartProps {
    images: string; //store as JSON string
    opacity: number;
    cardCols: number;
+   cardHeight: number;
+   cardColor: string;
 }
 
 interface IImageInfo {
@@ -50,15 +40,36 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
    private form: Components.IForm;
 
    public render(): void {
+      //const root = document.querySelector(':root') as HTMLElement;
+      const uniqueClassName = `betterHeroWebPart-${this.instanceId}`;
+      this.domElement.classList.add(uniqueClassName);
+
       if (!this.properties.cardCols) {
          this.properties.cardCols = 4;
       }
-      // see if opacity exists
+      // see if opacity exists and then set it
       if (this.properties.opacity >= 0 && this.properties.opacity <= 100) {
-         const root = document.querySelector(':root') as HTMLElement;
-         root.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
+         //const root = document.querySelector(':root') as HTMLElement;
+         //root.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
+         this.domElement.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
       }
 
+      // see if height exists and then set it
+      if (this.properties.cardHeight >= 200 && this.properties.cardHeight <= 400) {
+         //root.style.setProperty('--hero-image-height', (this.properties.cardHeight).toString() + 'px');
+         this.domElement.style.setProperty('--hero-image-height', `${this.properties.cardHeight}px`);
+      }
+
+      // see if color exists and then set it
+      if (this.properties.cardColor) {
+         const [red, green, blue] = this.getRGBFromColor(this.properties.cardColor);
+         //root.style.setProperty('--hero-image-background-red', red.toString());
+         //root.style.setProperty('--hero-image-background-green', green.toString());
+         //root.style.setProperty('--hero-image-background-blue', blue.toString());
+         this.domElement.style.setProperty('--hero-image-background-red', red.toString());
+         this.domElement.style.setProperty('--hero-image-background-green', green.toString());
+         this.domElement.style.setProperty('--hero-image-background-blue', blue.toString());
+      }
 
       // convert the images property to an array
       if (this.properties.images) {
@@ -76,6 +87,38 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       // render the images
       this.renderCards();
 
+   }
+
+
+   private getRGBFromColor(color: string): [number, number, number] {
+      let red = 0;
+      let green = 0;
+      let blue = 0;
+
+      switch (color) {
+         case 'purple':
+            red = 81;
+            green = 14;
+            blue = 153;
+            break;
+         case 'green':
+            red = 0;
+            green = 130;
+            blue = 61;
+            break;
+         case 'deepRed':
+            red = 102;
+            green = 0;
+            blue = 0;
+            break;
+         case 'brown':
+            red = 164;
+            green = 74;
+            blue = 51;
+            break;
+      }
+
+      return [red, green, blue];
    }
 
    // render card. pass in input variables
@@ -458,6 +501,22 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                            min: 1,
                            max: 12,
                            showValue: true
+                        }),
+                        PropertyPaneSlider('cardHeight', {
+                           label: strings.CardHeightFieldLabel,
+                           min: 200,
+                           max: 400,
+                           showValue: true
+                        }),
+                        PropertyPaneDropdown('cardColor', {
+                           label: strings.CardColorFieldLabel,
+                           options: [
+                              { key: 'black', text: 'black' },
+                              { key: 'brown', text: 'brown' },
+                              { key: 'deepRed', text: 'deep dark red' },
+                              { key: 'green', text: 'green' },
+                              { key: 'purple', text: 'purple' }
+                           ]
                         })
                      ]
                   }
