@@ -40,7 +40,9 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
    private form: Components.IForm;
 
    public render(): void {
-      const root = document.querySelector(':root') as HTMLElement;
+      //const root = document.querySelector(':root') as HTMLElement;
+      const uniqueClassName = `betterHeroWebPart-${this.instanceId}`;
+      this.domElement.classList.add(uniqueClassName);
 
       if (!this.properties.cardCols) {
          this.properties.cardCols = 4;
@@ -48,20 +50,25 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       // see if opacity exists and then set it
       if (this.properties.opacity >= 0 && this.properties.opacity <= 100) {
          //const root = document.querySelector(':root') as HTMLElement;
-         root.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
+         //root.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
+         this.domElement.style.setProperty('--hero-image-opacity', (this.properties.opacity / 100).toString());
       }
 
       // see if height exists and then set it
       if (this.properties.cardHeight >= 200 && this.properties.cardHeight <= 400) {
-         root.style.setProperty('--hero-image-height', (this.properties.cardHeight).toString() + 'px');
+         //root.style.setProperty('--hero-image-height', (this.properties.cardHeight).toString() + 'px');
+         this.domElement.style.setProperty('--hero-image-height', `${this.properties.cardHeight}px`);
       }
 
       // see if color exists and then set it
       if (this.properties.cardColor) {
          const [red, green, blue] = this.getRGBFromColor(this.properties.cardColor);
-         root.style.setProperty('--hero-image-background-red', red.toString());
-         root.style.setProperty('--hero-image-background-green', green.toString());
-         root.style.setProperty('--hero-image-background-blue', blue.toString());
+         //root.style.setProperty('--hero-image-background-red', red.toString());
+         //root.style.setProperty('--hero-image-background-green', green.toString());
+         //root.style.setProperty('--hero-image-background-blue', blue.toString());
+         this.domElement.style.setProperty('--hero-image-background-red', red.toString());
+         this.domElement.style.setProperty('--hero-image-background-green', green.toString());
+         this.domElement.style.setProperty('--hero-image-background-blue', blue.toString());
       }
 
       // convert the images property to an array
