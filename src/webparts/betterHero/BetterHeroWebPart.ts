@@ -12,6 +12,7 @@ import { Modal, LoadingDialog } from 'dattatable';
 import { Components, Helper } from 'gd-sprest-bs';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './BetterHeroWebPart.module.scss';
+import { BetterHeroWebPartHelpers } from './BetterHeroWebPartHelpers';
 
 export interface IBetterHeroWebPartProps {
    images: string; //store as JSON string
@@ -62,7 +63,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
 
       // see if color exists and then set it
       if (this.properties.cardColor) {
-         const [red, green, blue] = this.getRGBFromColor(this.properties.cardColor);
+         const [red, green, blue] = BetterHeroWebPartHelpers.getRGBFromColor(this.properties.cardColor);
          //root.style.setProperty('--hero-image-background-red', red.toString());
          //root.style.setProperty('--hero-image-background-green', green.toString());
          //root.style.setProperty('--hero-image-background-blue', blue.toString());
@@ -89,38 +90,6 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
 
    }
 
-
-   private getRGBFromColor(color: string): [number, number, number] {
-      let red = 0;
-      let green = 0;
-      let blue = 0;
-
-      switch (color) {
-         case 'purple':
-            red = 81;
-            green = 14;
-            blue = 153;
-            break;
-         case 'green':
-            red = 0;
-            green = 130;
-            blue = 61;
-            break;
-         case 'deepRed':
-            red = 102;
-            green = 0;
-            blue = 0;
-            break;
-         case 'brown':
-            red = 164;
-            green = 74;
-            blue = 51;
-            break;
-      }
-
-      return [red, green, blue];
-   }
-
    // render card. pass in input variables
    private renderCard(idx: number): HTMLElement {
       const imageInfo: IImageInfo = this.imagesInfo[idx];
@@ -128,9 +97,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       const elCard = document.createElement('div');
       //elCard.classList.add('col-md-6', 'col-lg-3');
 
-
       elCard.innerHTML = `
-         
             <a href="${isInEditMode ? '#' : imageInfo.url}">
                <div class="card bg-dark text-white" style="overflow: hidden;">
                   <img src="${imageInfo.image}" class="card-img ${styles.leaderPhoto}" alt="${imageInfo.title}">
@@ -165,7 +132,6 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                      // get element from array where image = selected one?, then delete
                      this.imagesInfo.splice(idx, 1);
                      this.properties.images = JSON.stringify(this.imagesInfo);
-
                      this.render();
                   }
                }
@@ -184,7 +150,6 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       return elCard;
    }
 
-
    private renderCards(): void {
       this.domElement.innerHTML = '';
 
@@ -197,7 +162,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       // bootstrap container to make it responsive
       const elContainer = document.createElement('div');
       elContainer.classList.add('container-fluid', 'my-2');
-      if (this.isFullWidthSection()) {
+      if (BetterHeroWebPartHelpers.isFullWidthSection(this.domElement)) {
          elContainer.style.marginLeft = "11px";
       }
       this.domElement.appendChild(elContainer);
@@ -224,11 +189,9 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
             elCol.classList.add('col-xs-1');
          }
          else {
-            elCol.classList.add(`${styles.customCol}`, `${this.getCustomColumnLayoutClass(this.properties.cardCols)}`);
+            elCol.classList.add(`${styles.customCol}`, `${BetterHeroWebPartHelpers.getCustomColumnLayoutClass(this.properties.cardCols)}`);
 
          }
-
-
 
          elRows.appendChild(elCol);
 
@@ -240,70 +203,11 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       // to clear out any javascript do this.domElement.innerHTML = this.domElement.innerHTML
    }
 
-   private isFullWidthSection(): boolean {
-      let element: HTMLElement | null = this.domElement;
-
-      while (element) {
-         if (element.classList && element.classList.contains('CanvasZone--fullWidth')) {
-            // Class found, this is a full-width section
-            return true;
-         }
-         element = element.parentElement;
-      }
-
-      // Full-width section class not found
-      return false;
-   }
-
-   private getCustomColumnLayoutClass(cardCols: number): string {
-      let customColumnLayoutClass: string = '';
-      switch (cardCols) {
-         case 7:
-            customColumnLayoutClass = styles.customCol7;
-            break;
-         case 8:
-            customColumnLayoutClass = styles.customCol8;
-            break;
-         case 9:
-            customColumnLayoutClass = styles.customCol9;
-            break;
-         case 10:
-            customColumnLayoutClass = styles.customCol10;
-            break;
-         case 11:
-            customColumnLayoutClass = styles.customCol11;
-            break;
-         case 12:
-            customColumnLayoutClass = styles.customCol12;
-            break;
-      }
-      return customColumnLayoutClass;
-   }
-
-   // Determines if the image extension is valid
-   private isImageFile(fileName: string): boolean {
-      let isValid = false;
-
-      // Parse the valid file extensions
-      for (let i = 0; i < ImageExtensions.length; i++) {
-         // See if this is a valid file extension
-         if (fileName.endsWith(ImageExtensions[i])) {
-            // Set the flag and break from the loop
-            isValid = true;
-            break;
-         }
-      }
-
-      // Return the flag
-      return isValid;
-   }
-
    private renderForm(idx: number = -1): void {
       const imageInfo = this.imagesInfo[idx];
       //set header
       Modal.clear();
       Modal.setHeader('Add image link');
-
 
       // render the form
       this.form = Components.Form({
@@ -364,7 +268,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                         const fileName = file.name.toLowerCase();
 
                         // Validate the file type
-                        if (this.isImageFile(fileName)) {
+                        if (BetterHeroWebPartHelpers.isImageFile(fileName, ImageExtensions)) {
                            // Show a loading dialog
                            LoadingDialog.setHeader("Reading the File");
                            LoadingDialog.setBody("This will close after the file is converted...");
