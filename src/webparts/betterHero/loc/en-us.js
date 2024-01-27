@@ -6,6 +6,7 @@ define([], function () {
     "OpacityFieldLabel": "Opacity of the text overlay",
     "CardColFieldLabel": "Number of columns per row",
     "CardHeightFieldLabel": "Height of the cards",
+    "CardColorFieldLabel": "Color of the text overlay background",
     "AppLocalEnvironmentSharePoint": "The app is running on your local environment as SharePoint web part",
     "AppLocalEnvironmentTeams": "The app is running on your local environment as Microsoft Teams app",
     "AppLocalEnvironmentOffice": "The app is running on your local environment in office.com",
