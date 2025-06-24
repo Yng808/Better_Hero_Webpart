@@ -144,7 +144,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                   }
                },
                {
-                  text: 'Delete',
+                  text: '🗑️',
                   type: Components.ButtonTypes.OutlineDanger,
                   onClick: () => {
                      // get element from array where image = selected one?, then delete
@@ -154,7 +154,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                   }
                },
                {
-                  text: '↑',
+                  text: '←',
                   type: Components.ButtonTypes.OutlineSecondary,
                   isDisabled: idx === 0, // Disable if it's the first item
                   onClick: () => {
@@ -162,7 +162,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                   }
                },
                {
-                  text: '↓',
+                  text: '→',
                   type: Components.ButtonTypes.OutlineSecondary,
                   isDisabled: idx === this.imagesInfo.length - 1, // Disable if it's the last item
                   onClick: () => {
