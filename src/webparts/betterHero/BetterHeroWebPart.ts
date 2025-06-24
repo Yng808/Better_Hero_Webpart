@@ -28,6 +28,7 @@ interface IImageInfo {
    url: string;
    subtitle: string;
    hoverText: string;
+   sortOrder: number;
 }
 
 // Acceptable image file types
@@ -77,6 +78,23 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
          try {
             // convert the JSON stringified string back to it's original form, the array
             this.imagesInfo = JSON.parse(this.properties.images);
+
+            // Add sortOrder to existing images that don't have it
+            let needsUpdate = false;
+            this.imagesInfo.forEach((imageInfo, index) => {
+               if (imageInfo.sortOrder === undefined || imageInfo.sortOrder === null) {
+                  imageInfo.sortOrder = index + 1; // Default sort order based on current position
+                  needsUpdate = true;
+               }
+            });
+            
+            // Save updated images if sortOrder was added to null values
+            if (needsUpdate) {
+               this.properties.images = JSON.stringify(this.imagesInfo);
+            }
+            
+            // Sort images by sortOrder property
+            this.imagesInfo.sort((a, b) => a.sortOrder - b.sortOrder);
          } catch (error) {
             this.imagesInfo = [];
          }
@@ -90,7 +108,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
 
    }
 
-   // render card. pass in input variables
+   // Render card. Pass input variables
    private renderCard(idx: number): HTMLElement {
       const imageInfo: IImageInfo = this.imagesInfo[idx];
       const isInEditMode = this.displayMode === DisplayMode.Edit;
@@ -118,7 +136,7 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
             isSmall: true,
             buttons: [
                {
-                  text: 'Edit',
+                  text: '✏️',
                   type: Components.ButtonTypes.OutlinePrimary,
                   onClick: () => {
                      // todo
@@ -126,13 +144,29 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                   }
                },
                {
-                  text: 'Delete',
+                  text: '🗑️',
                   type: Components.ButtonTypes.OutlineDanger,
                   onClick: () => {
                      // get element from array where image = selected one?, then delete
                      this.imagesInfo.splice(idx, 1);
                      this.properties.images = JSON.stringify(this.imagesInfo);
                      this.render();
+                  }
+               },
+               {
+                  text: '←',
+                  type: Components.ButtonTypes.OutlineSecondary,
+                  isDisabled: idx === 0, // Disable if it's the first item
+                  onClick: () => {
+                     this.moveItemUp(idx);
+                  }
+               },
+               {
+                  text: '→',
+                  type: Components.ButtonTypes.OutlineSecondary,
+                  isDisabled: idx === this.imagesInfo.length - 1, // Disable if it's the last item
+                  onClick: () => {
+                     this.moveItemDown(idx);
                   }
                }
             ]
@@ -213,14 +247,20 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       this.form = Components.Form({
          el: Modal.BodyElement,
          value: imageInfo,
-         controls: [
-            //title, image, url
+         controls: [           
             {
                name: 'title',
                label: 'Title:',
                type: Components.FormControlTypes.TextField,
                required: true,
                errorMessage: 'Must specify a Title'
+            },
+            {
+               name: 'sortOrder',
+               label: 'Sort Order:',
+               type: Components.FormControlTypes.TextField,
+               required: false,
+               errorMessage: 'Sort order must be a valid number'
             },
             {
                name: 'url',
@@ -430,4 +470,40 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       };
    }
 
+   // Helper method to move item up in the list for the sort order
+   private moveItemUp(idx: number): void {
+      if (idx > 0) {
+         // Swap with the previous item
+         const temp = this.imagesInfo[idx];
+         this.imagesInfo[idx] = this.imagesInfo[idx - 1];
+         this.imagesInfo[idx - 1] = temp;
+         
+         // Update sortOrder values
+         this.imagesInfo[idx].sortOrder = idx + 1;
+         this.imagesInfo[idx - 1].sortOrder = idx;
+         
+         // Save and re-render
+         this.properties.images = JSON.stringify(this.imagesInfo);
+         this.render();
+      }
+   }
+
+   // Helper method to move item down in the list for the sort order
+   private moveItemDown(idx: number): void {
+      if (idx < this.imagesInfo.length - 1) {
+         // Swap with the next item
+         const temp = this.imagesInfo[idx];
+         this.imagesInfo[idx] = this.imagesInfo[idx + 1];
+         this.imagesInfo[idx + 1] = temp;
+         
+         // Update sortOrder values
+         this.imagesInfo[idx].sortOrder = idx + 1;
+         this.imagesInfo[idx + 1].sortOrder = idx + 2;
+         
+         // Save and re-render
+         this.properties.images = JSON.stringify(this.imagesInfo);
+         this.render();
+      }
+
+   }
 }

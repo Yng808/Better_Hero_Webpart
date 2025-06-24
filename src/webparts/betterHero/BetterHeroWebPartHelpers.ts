@@ -90,4 +90,6 @@ export class BetterHeroWebPartHelpers {
         // Return the flag
         return isValid;
     }
+
+    
 }
