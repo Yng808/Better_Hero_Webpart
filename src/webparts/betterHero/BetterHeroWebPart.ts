@@ -13,6 +13,7 @@ import { Components, Helper } from 'gd-sprest-bs';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './BetterHeroWebPart.module.scss';
 import { BetterHeroWebPartHelpers } from './BetterHeroWebPartHelpers';
+import Panzoom from '@panzoom/panzoom';
 
 export interface IBetterHeroWebPartProps {
    images: string; //store as JSON string
@@ -29,6 +30,9 @@ interface IImageInfo {
    subtitle: string;
    hoverText: string;
    sortOrder: number;
+   zoom?: number;
+   panX?: number;
+   panY?: number;
 }
 
 // Acceptable image file types
@@ -40,6 +44,7 @@ const ImageExtensions = [
 export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHeroWebPartProps> {
    private imagesInfo: IImageInfo[];
    private form: Components.IForm;
+   private panzoomInstances: Map<string, any> = new Map(); // Store panzoom instances
 
    public render(): void {
       //const root = document.querySelector(':root') as HTMLElement;
@@ -115,21 +120,74 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       const elCard = document.createElement('div');
       //elCard.classList.add('col-md-6', 'col-lg-3');
 
+      const imageId = `image-${this.instanceId}-${idx}`;
+
+      const zoom = imageInfo.zoom || 1;
+      const panX = imageInfo.panX || 0;
+      const panY = imageInfo.panY || 0;
+      const transformStyle = `transform: scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px);`;
+
       elCard.innerHTML = `
             <a href="${isInEditMode ? '#' : imageInfo.url}">
-               <div class="card bg-dark text-white" style="overflow: hidden;">
-                  <img src="${imageInfo.image}" class="card-img ${styles.leaderPhoto}" alt="${imageInfo.title}">
-                  <div class="card-img-overlay ${styles.cardImgOverlay}">
-                        <h5 class="card-title ${styles.textTruncate}">${imageInfo.title}</h5>
-                        <p class="card-text ${styles.textTruncate}">${imageInfo.subtitle || ''}</p>
-                  </div>    
-               </div>             
-            </a>
+             <div class="card bg-dark text-white ${styles.cardHideOverflow}">
+                <div class="image-container" style="height: var(--hero-image-height); position: relative; overflow: hidden;">
+                   <img id="${imageId}" 
+                        src="${imageInfo.image}" 
+                        class="card-img ${styles.leaderPhoto}" 
+                        alt="${imageInfo.title}"
+                        style="width: 100%; height: 100%; object-fit: cover; cursor: ${isInEditMode ? 'move' : 'pointer'}; transition: transform 0.3s ease; ${isInEditMode ? '' : transformStyle}">
+                </div>
+                <div class="card-img-overlay ${styles.cardImgOverlay}">
+                   <h5 class="card-title ${styles.textTruncate}">${imageInfo.title}</h5>
+                   <p class="card-text ${styles.textTruncate}">${imageInfo.subtitle || ''}</p>
+                </div>    
+             </div>             
+          </a>
 
-            ${isInEditMode ? '<div class="card card-buttons"></div>' : ''}
+            ${isInEditMode ? `
+             <div class="card card-buttons"></div>
+             <div class="card-settings" style="padding: 10px; background: #f8f9fa; border-top: 1px solid #dee2e6;">
+                <div class="row">
+                   <div class="col-4">
+                      <label style="font-size: 12px;">Zoom</label>
+                      <input type="range" class="form-range zoom-slider" 
+                             min="0.5" max="3" step="0.1" 
+                             value="${imageInfo.zoom || 1}" 
+                             data-image-id="${imageId}">
+                      <span class="zoom-value" style="font-size: 11px;">${((imageInfo.zoom || 1) * 100).toFixed(0)}%</span>
+                   </div>
+                   <div class="col-4">
+                      <label style="font-size: 12px;">Pan X</label>
+                      <input type="range" class="form-range panx-slider" 
+                             min="-100" max="100" step="1" 
+                             value="${imageInfo.panX || 0}" 
+                             data-image-id="${imageId}">
+                      <span class="panx-value" style="font-size: 11px;">${imageInfo.panX || 0}</span>
+                   </div>
+                   <div class="col-4">
+                      <label style="font-size: 12px;">Pan Y</label>
+                      <input type="range" class="form-range pany-slider" 
+                             min="-100" max="100" step="1" 
+                             value="${imageInfo.panY || 0}" 
+                             data-image-id="${imageId}">
+                      <span class="pany-value" style="font-size: 11px;">${imageInfo.panY || 0}</span>
+                   </div>
+                </div>
+                <div style="margin-top: 8px;">
+                   <button class="btn btn-sm btn-outline-primary reset-btn" data-index="${idx}">Reset</button>
+                   <button class="btn btn-sm btn-primary save-btn" data-index="${idx}">Save Position</button>
+                </div>
+             </div>
+          ` : ''}
          `;
 
       if (isInEditMode) {
+         // Setup Panzoom for edit mode
+          setTimeout(() => {
+             this.setupPanzoom(imageId, idx);
+             this.setupSliderEvents(elCard, imageId, idx);
+          }, 100);
+
          //render buttons
          Components.ButtonGroup({
             el: elCard.querySelector('.card-buttons') as HTMLElement,
@@ -281,6 +339,24 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                label: 'Hover Text',
                type: Components.FormControlTypes.TextArea
             },
+            {
+                name: 'zoom',
+                label: 'Default Zoom',
+                type: Components.FormControlTypes.TextField,
+                value: imageInfo?.zoom || 1
+             },
+             {
+                name: 'panX',
+                label: 'Default Pan X',
+                type: Components.FormControlTypes.TextField,
+                value: imageInfo?.panX || 0
+             },
+             {
+                name: 'panY',
+                label: 'Default Pan Y',
+                type: Components.FormControlTypes.TextField,
+                value: imageInfo?.panY || 0
+             },
             {
                name: 'image',
                label: 'Image:',
@@ -506,4 +582,164 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       }
 
    }
+
+
+    private setupPanzoom(imageId: string, idx: number): void {
+       const imageElement = document.getElementById(imageId) as HTMLElement;
+       if (!imageElement) return;
+ 
+       const imageInfo = this.imagesInfo[idx];
+       
+       // Initialize Panzoom
+       const panzoom = Panzoom(imageElement, {
+          maxScale: 3,
+          minScale: 0.5,
+          contain: 'outside',
+          cursor: 'move',
+          // Apply saved settings
+          startX: imageInfo.panX || 0,
+          startY: imageInfo.panY || 0,
+          startScale: imageInfo.zoom || 1
+       });
+ 
+       // Store instance for cleanup
+       this.panzoomInstances.set(imageId, panzoom);
+ 
+       // Handle zoom with mouse wheel
+       imageElement.parentElement?.addEventListener('wheel', panzoom.zoomWithWheel);
+ 
+       // Update sliders when panzoom changes
+       imageElement.addEventListener('panzoomchange', (event: any) => {
+          const { x, y, scale } = event.detail;
+          this.updateSliderValues(imageId, scale, x, y);
+          
+          // Auto-save position changes
+          this.imagesInfo[idx] = {
+             ...this.imagesInfo[idx],
+             zoom: scale,
+             panX: Math.round(x),
+             panY: Math.round(y)
+          };
+       });
+    }
+ 
+    private setupSliderEvents(cardElement: HTMLElement, imageId: string, idx: number): void {
+       const panzoom = this.panzoomInstances.get(imageId);
+       if (!panzoom) return;
+ 
+       // Zoom slider
+       const zoomSlider = cardElement.querySelector('.zoom-slider') as HTMLInputElement;
+       zoomSlider?.addEventListener('input', (e) => {
+          const zoom = parseFloat((e.target as HTMLInputElement).value);
+          panzoom.zoom(zoom, { animate: true });
+          
+          // Update display value immediately
+          const zoomValue = cardElement.querySelector('.zoom-value');
+          if (zoomValue) zoomValue.textContent = `${(zoom * 100).toFixed(0)}%`;
+       });
+ 
+       // Pan X slider
+       const panXSlider = cardElement.querySelector('.panx-slider') as HTMLInputElement;
+       panXSlider?.addEventListener('input', (e) => {
+          const panX = parseInt((e.target as HTMLInputElement).value);
+          const currentY = this.imagesInfo[idx].panY || 0;
+          panzoom.pan(panX, currentY, { animate: true });
+          
+          // Update display value immediately
+          const panXValue = cardElement.querySelector('.panx-value');
+          if (panXValue) panXValue.textContent = panX.toString();
+       });
+ 
+       // Pan Y slider
+       const panYSlider = cardElement.querySelector('.pany-slider') as HTMLInputElement;
+       panYSlider?.addEventListener('input', (e) => {
+          const panY = parseInt((e.target as HTMLInputElement).value);
+          const currentX = this.imagesInfo[idx].panX || 0;
+          panzoom.pan(currentX, panY, { animate: true });
+          
+          // Update display value immediately
+          const panYValue = cardElement.querySelector('.pany-value');
+          if (panYValue) panYValue.textContent = panY.toString();
+       });
+ 
+       // Reset button
+       const resetBtn = cardElement.querySelector('.reset-btn') as HTMLButtonElement;
+       resetBtn?.addEventListener('click', () => {
+          this.resetImagePosition(idx, panzoom, cardElement);
+       });
+ 
+       // Save button
+       const saveBtn = cardElement.querySelector('.save-btn') as HTMLButtonElement;
+       saveBtn?.addEventListener('click', () => {
+          this.saveImageSettings(idx);
+       });
+    }
+ 
+    private updateSliderValues(imageId: string, scale: number, x: number, y: number): void {
+       // Find sliders directly by their data-image-id attribute
+       const zoomSlider = document.querySelector(`[data-image-id="${imageId}"].zoom-slider`) as HTMLInputElement;
+       const panXSlider = document.querySelector(`[data-image-id="${imageId}"].panx-slider`) as HTMLInputElement;
+       const panYSlider = document.querySelector(`[data-image-id="${imageId}"].pany-slider`) as HTMLInputElement;
+ 
+       // Find value display elements (they're siblings of the sliders)
+       const zoomValue = zoomSlider?.parentElement?.querySelector('.zoom-value');
+       const panXValue = panXSlider?.parentElement?.querySelector('.panx-value');
+       const panYValue = panYSlider?.parentElement?.querySelector('.pany-value');
+ 
+       // Update slider positions
+       if (zoomSlider) zoomSlider.value = scale.toString();
+       if (panXSlider) panXSlider.value = Math.round(x).toString();
+       if (panYSlider) panYSlider.value = Math.round(y).toString();
+ 
+       // Update value displays
+       if (zoomValue) zoomValue.textContent = `${(scale * 100).toFixed(0)}%`;
+       if (panXValue) panXValue.textContent = Math.round(x).toString();
+       if (panYValue) panYValue.textContent = Math.round(y).toString();
+    }
+
+ 
+    private resetImagePosition(idx: number, panzoom: any, cardElement: Element): void {
+       // Reset to default values
+       panzoom.reset({ animate: true });
+       
+       // Update image info
+       this.imagesInfo[idx] = {
+          ...this.imagesInfo[idx],
+          zoom: 1,
+          panX: 0,
+          panY: 0
+       };
+ 
+       // Update UI
+       this.updateSliderValues(`image-${this.instanceId}-${idx}`, 1, 0, 0);
+    }
+ 
+    private saveImageSettings(idx: number): void {
+       // Save to web part properties
+       this.properties.images = JSON.stringify(this.imagesInfo);
+       
+       // Show confirmation (you can customize this)
+       const saveBtn = document.querySelector(`[data-index="${idx}"].save-btn`) as HTMLButtonElement;
+       if (saveBtn) {
+          const originalText = saveBtn.textContent;
+          saveBtn.textContent = 'Saved!';
+          saveBtn.style.backgroundColor = '#28a745';
+          
+          setTimeout(() => {
+             saveBtn.textContent = originalText;
+             saveBtn.style.backgroundColor = '';
+          }, 2000);
+       }
+    }
+
+ 
+    // Add cleanup method
+    public onDispose(): void {
+       // Clean up all panzoom instances
+       this.panzoomInstances.forEach(panzoom => {
+          panzoom.destroy();
+       });
+       this.panzoomInstances.clear();
+    }
+
 }
