@@ -197,11 +197,11 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
 
       // bootstrap container to make it responsive
       const elContainer = document.createElement('div');
+      elContainer.classList.add('container-fluid', 'my-2');
+
       if (this.properties.toggleMaxWidth === 'yes') {
-         elContainer.classList.add('container-fluid', 'my-2', `max-width-${this.properties.maxWidth}`);
-      } else {
-         elContainer.classList.add('container-fluid', 'my-2');
-      }
+         elContainer.style.maxWidth = `${this.properties.maxWidth}px`;
+      } 
       
       if (BetterHeroWebPartHelpers.isFullWidthSection(this.domElement)) {
          elContainer.style.marginLeft = "11px";
@@ -471,15 +471,16 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                         }),
                         PropertyPaneDropdown('toggleMaxWidth', {
                            label: strings.ToggleMaxWidthLabel,
+                           selectedKey: 'no',  // default to 'no'
                            options: [
                               { key: 'yes', text: 'Yes' },
                               { key: 'no', text: 'No' }
                            ]
                         }),
                         PropertyPaneSlider('maxWidth', {
-                           label: strings.CardHeightFieldLabel,
+                           label: strings.MaxWidthLabel,
                            min: 100,
-                           max: 2000,
+                           max: 4000,
                            showValue: true
                         })
                      ]
