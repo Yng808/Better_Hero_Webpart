@@ -5,6 +5,8 @@ declare interface IBetterHeroWebPartStrings {
   OpacityFieldLabel: string;
   CardColFieldLabel: string;
   CardHeightFieldLabel: string;
+  MaxWidthLabel: string;
+  ToggleMaxWidthLabel: string;
   CardColorFieldLabel: string;
   AppLocalEnvironmentSharePoint: string;
   AppLocalEnvironmentTeams: string;
