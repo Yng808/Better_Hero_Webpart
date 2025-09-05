@@ -6,6 +6,8 @@ define([], function () {
     "OpacityFieldLabel": "Opacity of the text overlay",
     "CardColFieldLabel": "Number of columns per row",
     "CardHeightFieldLabel": "Height of the cards",
+    "MaxWidthLabel": "Maximum width of the webpart",
+    "ToggleMaxWidthLabel": "Enable maximum width",
     "CardColorFieldLabel": "Color of the text overlay background",
     "AppLocalEnvironmentSharePoint": "The app is running on your local environment as SharePoint web part",
     "AppLocalEnvironmentTeams": "The app is running on your local environment as Microsoft Teams app",

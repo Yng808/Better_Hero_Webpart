@@ -20,6 +20,8 @@ export interface IBetterHeroWebPartProps {
    cardCols: number;
    cardHeight: number;
    cardColor: string;
+   toggleMaxWidth: string; // yes or no
+   maxWidth: number; // max width in pixels
 }
 
 interface IImageInfo {
@@ -196,6 +198,11 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
       // bootstrap container to make it responsive
       const elContainer = document.createElement('div');
       elContainer.classList.add('container-fluid', 'my-2');
+
+      if (this.properties.toggleMaxWidth === 'yes') {
+         elContainer.style.maxWidth = `${this.properties.maxWidth}px`;
+      } 
+      
       if (BetterHeroWebPartHelpers.isFullWidthSection(this.domElement)) {
          elContainer.style.marginLeft = "11px";
       }
@@ -461,6 +468,20 @@ export default class BetterHeroWebPart extends BaseClientSideWebPart<IBetterHero
                               { key: 'green', text: 'green' },
                               { key: 'purple', text: 'purple' }
                            ]
+                        }),
+                        PropertyPaneDropdown('toggleMaxWidth', {
+                           label: strings.ToggleMaxWidthLabel,
+                           selectedKey: 'no',  // default to 'no'
+                           options: [
+                              { key: 'yes', text: 'Yes' },
+                              { key: 'no', text: 'No' }
+                           ]
+                        }),
+                        PropertyPaneSlider('maxWidth', {
+                           label: strings.MaxWidthLabel,
+                           min: 100,
+                           max: 4000,
+                           showValue: true
                         })
                      ]
                   }
